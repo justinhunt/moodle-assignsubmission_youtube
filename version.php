@@ -24,9 +24,9 @@
  */
 
 defined('MOODLE_INTERNAL') || die();
-$plugin->version   = 2013022100;
+$plugin->version   = 2013031100;
 $plugin->requires  = 2012062500;
 $plugin->component = 'assignsubmission_youtube'; 
 $plugin->maturity  = MATURITY_BETA;
-$plugin->release   = '0.9 (Build 2013022100)';
+$plugin->release   = '0.95 (Build 2013031100)';
 

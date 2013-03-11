@@ -627,15 +627,19 @@ class assign_submission_youtube extends assign_submission_plugin {
 
       /**
      * Produce a list of files suitable for export that represent this feedback or submission
-     *
+     * //11/03/2013 Just commented the whole thing, Moodle API changes to this method signature
+	 * meant would have made it impossible to use without throwing errors.
      * @param stdClass $submission The submission
      * @return array - return an array of files indexed by filename
      */
+	 /*
     public function get_files(stdClass $submission) {
         $result = array();
 		//how to handle this?
         return $result;
     }
+	*/
+	
 
 
 
