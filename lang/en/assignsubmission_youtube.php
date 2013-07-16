@@ -72,5 +72,5 @@ $string['youtubeplayersizeheading'] =  'YouTube Player Size Settings';
 $string['nodevkey'] =  'To upload, your administrator must specify their developer key in the admin settings for this plugin.';
 $string['nomaster'] =  'To upload, your administrator must specify a master YouTube account and password.';
 $string['nooauth2'] =  'To upload, your administrator must specify a Google OAUTH2 client id and secret.';
-
+$string['currentsubmission'] = 'Current Submission';
 

@@ -575,9 +575,16 @@ class assign_submission_youtube extends assign_submission_plugin {
 				$youtubeid = $match[1];
 			}
 		}
-		
+	
         $youtubesubmission = $this->get_youtube_submission($submission->id);
         if ($youtubesubmission) {
+			//if we have a submission, and this is an update, but no youtubeid
+			//we assume they are updating another submission, and return true
+			//without changing out database entry
+			if(!$youtubeid || $youtubeid == ''){
+				return true;
+			}
+		
 			$youtubesubmission->submission = $submission->id;
             $youtubesubmission->assignment = $this->assignment->get_instance()->id;
 		 	$youtubesubmission->youtubeid = $youtubeid;
