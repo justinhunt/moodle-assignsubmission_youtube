@@ -92,6 +92,7 @@ class assign_submission_youtube extends assign_submission_plugin {
 			
 		//The size of the youtube player on the various screens		
 		$displaysizes = array('0' => new lang_string('linkonly', 'assignsubmission_youtube'),
+                                 '1' => new lang_string('moodledefault', 'assignsubmission_youtube'),
 				'160' => '160x120', '320' => '320x240','480' => '480x360',
 				'640' => '640x480','800'=>'800x600','1024'=>'1024x768');
 		
@@ -547,7 +548,14 @@ class assign_submission_youtube extends assign_submission_plugin {
 			return "<div id='$playerid' onclick='$callfunc'><a href='#$playerid'>" . 
 				get_string('clicktoplayvideo', 'assignsubmission_youtube') 
 				. "</a></div>";
-		}else{
+		
+                //rely on Moodle to display it properly
+                }elseif($size=='1'){
+                        
+                        $returnString =  '<a href="http://www.youtube.com/v/' . $playerid . '">youtube video</a>';
+                        return format_text($returnString, FORMAT_HTML, array('overflowdiv' => true, 'context' => $this->assignment->get_context()));
+
+                }else{
 			$PAGE->requires->js_init_call('M.assignsubmission_youtube.loadytplayer', array($opts),false,$jsmodule);
 			return "<div id='$playerid'></div>";
 		}

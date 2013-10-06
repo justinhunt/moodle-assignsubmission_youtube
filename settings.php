@@ -84,16 +84,17 @@ $settings->add(new admin_setting_heading('youtubeplayersizeheading', '', get_str
 
 //The size of the youtube player on the various screens		
 $options = array('0' => new lang_string('linkonly', 'assignsubmission_youtube'),
+                        '1' => new lang_string('moodledefault', 'assignsubmission_youtube'),
 				'160' => '160x120', '320' => '320x240','480' => '480x360',
 				'640' => '640x480','800'=>'800x600','1024'=>'1024x768');
 				
 $settings->add(new admin_setting_configselect('assignsubmission_youtube/displaysize_single', 
 					new lang_string('displaysizesingle', 'assignsubmission_youtube'), 
-					new lang_string('displaysizesingledetails', 'assignsubmission_youtube'), '320', $options));
+					new lang_string('displaysizesingledetails', 'assignsubmission_youtube'), '1', $options));
 
 $settings->add(new admin_setting_configselect('assignsubmission_youtube/displaysize_list', 
 					new lang_string('displaysizelist', 'assignsubmission_youtube'), 
-					new lang_string('displaysizelistdetails', 'assignsubmission_youtube'), '480', $options));
+					new lang_string('displaysizelistdetails', 'assignsubmission_youtube'), '1', $options));
 					
 				
 					
