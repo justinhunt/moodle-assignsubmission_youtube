@@ -95,6 +95,49 @@ $settings->add(new admin_setting_configselect('assignsubmission_youtube/displays
 					new lang_string('displaysizelist', 'assignsubmission_youtube'), 
 					new lang_string('displaysizelistdetails', 'assignsubmission_youtube'), '480', $options));
 					
+	// Video Default Settings
+	$settings->add(new admin_setting_heading('videoinfoheading', '', get_string('videoinfoheading', 'assignsubmission_youtube')));
+	$privacyoptions = array('unlisted' => new lang_string('unlisted', 'assignsubmission_youtube'),
+		'public' => new lang_string('public', 'assignsubmission_youtube'),
+		'private' => new lang_string('private', 'assignsubmission_youtube'));
+	$settings->add(new admin_setting_configselect('assignsubmission_youtube/videoprivacy',
+			   get_string('videoprivacy', 'assignsubmission_youtube'),
+			   get_string('videoprivacydetails', 'assignsubmission_youtube'), 'unlisted',$privacyoptions));
+			   
+	//Category settings
+	$categoryoptions = array('Education' => new lang_string('cat_education', 'assignsubmission_youtube'),
+					'Animals' => new lang_string('cat_animals', 'assignsubmission_youtube'),
+					'Autos' => new lang_string('cat_autos', 'assignsubmission_youtube'),
+					'Comedy' => new lang_string('cat_comedy', 'assignsubmission_youtube'),
+					'Film' => new lang_string('cat_film', 'assignsubmission_youtube'),
+					'Games' => new lang_string('cat_games', 'assignsubmission_youtube'),
+					'Howto' => new lang_string('cat_howto', 'assignsubmission_youtube'),
+					'Music' => new lang_string('cat_music', 'assignsubmission_youtube'),
+					'News' => new lang_string('cat_news', 'assignsubmission_youtube'),	
+					'Nonprofit' => new lang_string('cat_nonprofit', 'assignsubmission_youtube'),
+					'People' => new lang_string('cat_people', 'assignsubmission_youtube'),
+					'Tech' => new lang_string('cat_tech', 'assignsubmission_youtube'),
+					'Sports' => new lang_string('cat_sports', 'assignsubmission_youtube'),
+					'Travel' => new lang_string('cat_travel', 'assignsubmission_youtube'));
+					
+	$settings->add(new admin_setting_configselect('assignsubmission_youtube/videocategory',
+		   get_string('videocategory', 'assignsubmission_youtube'),
+		   get_string('videocategorydetails', 'assignsubmission_youtube'), 'Education',$categoryoptions));
+		   
+	//Comment on YouTube Ok
+	$settings->add(new admin_setting_configcheckbox('assignsubmission_youtube/allow_ytcomment',
+                   new lang_string('allowytcomment', 'assignsubmission_youtube'),
+                   new lang_string('allowytcommentdetails', 'assignsubmission_youtube'), 0));
+	//Rate on YouTube OK			   
+	$settings->add(new admin_setting_configcheckbox('assignsubmission_youtube/allow_ytrate',
+                   new lang_string('allowytrate', 'assignsubmission_youtube'),
+                   new lang_string('allowytratedetails', 'assignsubmission_youtube'), 0));
+	//Video Respond on YouTube OK			   
+	$settings->add(new admin_setting_configcheckbox('assignsubmission_youtube/allow_ytrespond',
+                   new lang_string('allowytrespond', 'assignsubmission_youtube'),
+                   new lang_string('allowytresponddetails', 'assignsubmission_youtube'), 0));
+
+					
 				
 					
 

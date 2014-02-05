@@ -35,6 +35,7 @@ $showform = optional_param('showform', 0,PARAM_INT); // to show the form(lets rc
 $status = optional_param('status', 0,PARAM_INT); // request status
 $video_id = optional_param('id', '', PARAM_TEXT); // youtube id of video
 $code = optional_param('code', 0,PARAM_INT); // error code
+$parentid = optional_param('parentid', 0,PARAM_INT); // error code
 $video_title = optional_param('videotitle', 'a youtube assignment',PARAM_TEXT); // title of video
 
 //we need to set the page context
@@ -50,7 +51,7 @@ if($showform==0){
 				<script type="text/javascript">
 					function process_youtube_return()
 					{
-						var vfield = parent.document.getElementById('id_youtubeid');
+						var vfield = parent.document.getElementById('id_assignsubmission_youtube_youtubeid');
 						vfield.value = '<?php echo $video_id; ?>';
 						//if auto saving, uncomment this
 						//parent.document.getElementById('id_submitbutton').click();
@@ -77,6 +78,14 @@ if($showform==0){
 	if(empty($youtubesub)) {
 		die;
 	}
+	$ytconfig = $youtubesub->get_ytconfig($parentid);
+	$ytargs = Array('component'=>'assignsubmission_youtube','config'=>$ytconfig);
+	
+	$ytapi = new assignsubmission_youtube_api($ytargs);
+	if(empty($ytapi)) {
+		die;
+	}
+	
 	//set up the page
 	$PAGE->set_context(get_context_instance(CONTEXT_USER, $USER->id));
 	$PAGE->set_url($CFG->wwwroot.'/mod/assign/submission/youtube/uploader.php');
@@ -84,8 +93,10 @@ if($showform==0){
 
 	<div style="text-align: center;">
 	<?php 
-				$yt = $youtubesub->init_youtube_api();
-				echo $youtubesub->fetch_youtube_uploadform($yt,$video_title,$video_title);
+				//$yt = $youtubesub->init_youtube_api();
+				//echo $youtubesub->fetch_youtube_uploadform($yt,$video_title,$video_title);
+				$yt = $ytapi->init_youtube_api();
+				echo $ytapi->fetch_youtube_uploadform($yt,$video_title);
 
 	?>
 	</div>

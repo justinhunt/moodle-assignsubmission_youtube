@@ -38,8 +38,8 @@ $clientLibraryPath = $CFG->httpswwwroot . '/mod/assign/submission/youtube/ZendGd
 $oldPath = set_include_path(get_include_path() . PATH_SEPARATOR . $clientLibraryPath);
 require_once 'Zend/Loader.php';
 
-//Added Justin 20120115 For OAUTH, 
-require_once($CFG->libdir.'/googleapi.php');
+global $CFG;
+require_once("$CFG->dirroot/mod/assign/submission/youtube/youtubelib.php");
 
 /**
  * library class for youtube submission plugin extending submission plugin base class
@@ -49,8 +49,60 @@ require_once($CFG->libdir.'/googleapi.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class assign_submission_youtube extends assign_submission_plugin {
-	private $youtubeoauth = null;
+	//comment Justin 20130717
+	//private $youtubeoauth = null;
+	
+	protected $ytconfig = null;
 
+	
+	public function get_ytconfig($parentid=false){
+		global $CFG, $USER;
+		
+		//create our video title, and replace any suspicous chars that might mess up javascript
+		$videotitle = fullname($USER) . ' using YouTube Submission';
+		$videotitle = str_replace('\'','-',$videotitle);
+		$videotitle = str_replace('\"','-',$videotitle);
+		
+		//$parentid 
+		if($parentid){
+			//do nothing
+		}else if($this->assignment->has_instance()){
+			$parentid=$this->assignment->get_instance()->id;
+		}else{
+			$parentid=0;
+		}
+		//Add youtube tabset
+		$config = new assignsubmission_youtube_settings();
+		$config->set('videotitle',$videotitle);
+		$config->set('tabsetid','youtubetabset_id');
+		$config->set('devkey',get_config('assignsubmission_youtube', 'devkey'));
+		$config->set('authtype',get_config('assignsubmission_youtube', 'authtype'));
+		$config->set('masteruser',get_config('assignsubmission_youtube', 'youtube_masteruser'));
+		$config->set('masterpass',get_config('assignsubmission_youtube', 'youtube_masterpass'));
+		$config->set('clientid',get_config('assignsubmission_youtube', 'youtube_clientid'));
+		$config->set('secret',get_config('assignsubmission_youtube', 'youtube_secret'));
+		$config->set('allow_manual',get_config('assignsubmission_youtube', 'allow_manual')); //this is used for the browse tab
+		//$config->set('allow_browse',get_config('assignsubmission_youtube', 'allow_browse'));
+		$config->set('allow_webcam',get_config('assignsubmission_youtube', 'allow_webcam'));
+		$config->set('allow_uploads',get_config('assignsubmission_youtube', 'allow_uploads'));
+		$config->set('videoprivacy',get_config('assignsubmission_youtube', 'videoprivacy'));
+		$config->set('videocategory',get_config('assignsubmission_youtube', 'videocategory'));
+		$config->set('allow_ytcomment',get_config('assignsubmission_youtube', 'allow_ytcomment'));
+		$config->set('allow_ytrate',get_config('assignsubmission_youtube', 'allow_ytrate'));
+		$config->set('allow_ytrespond',get_config('assignsubmission_youtube', 'allow_ytrespond'));
+		$config->set('parentid',$parentid);
+	
+		//eg /mod/assign/submission/youtube
+		$config->set('modroot','/mod/assign/submission/youtube');
+		//eg /mod/assign/view.php
+		//$config->set('returnurl',$PAGE->url);
+		$config->set('returnurl','/mod/assign/submission/youtube/youtube_callback.php');
+		$config->set('returnparam',$parentid);
+		$config->set('shortdesc','YouTube Assignment Submission');
+		
+		return $config;
+	}
+	
     /**
      * Get the name of the online text submission plugin
      * @return string
@@ -142,6 +194,7 @@ class assign_submission_youtube extends assign_submission_plugin {
 	 *
      * @return youtube api object 
      */
+	 /*
 	public function init_youtube_api(){
 		global $CFG,$USER;
 		$devkey = get_config('assignsubmission_youtube', 'devkey');
@@ -165,10 +218,8 @@ class assign_submission_youtube extends assign_submission_plugin {
 		$yt = new Zend_Gdata_YouTube($httpclient,YOUTUBEAPPID,fullname($USER),$devkey);
 
 		return $yt;
-
-		
-		
 	}
+	*/
 	
 	/**
      * Initialize and return Youtube api object
@@ -176,6 +227,7 @@ class assign_submission_youtube extends assign_submission_plugin {
      * @param string authentication method (clientlogin, authsub, oauth2)
      * @return youtube httpclient object 
      */
+	 /*
 	public function get_youtube_httpclient($authmethod){
 		
 		switch ($authmethod){
@@ -209,6 +261,7 @@ class assign_submission_youtube extends assign_submission_plugin {
 		}
 		return $httpclient;
 	}
+	*/
 	
 	
    /**
@@ -247,7 +300,21 @@ class assign_submission_youtube extends assign_submission_plugin {
 				$mform->addElement('static', 'currentsubmission', get_string('currentsubmission','assignsubmission_youtube'),$ytplayer);
 			}
         }
-
+		
+		
+		$mediadata = '';
+		$yt = null;
+		if(!$yt){
+			//init youtube api
+            $this->ytconfig = $this->get_ytconfig();
+            $ytargs = Array('component'=>ASSIGNSUBMISSION_YOUTUBE_COMPONENT,'config'=>$this->ytconfig);
+            $yt = new assignsubmission_youtube_api($ytargs);
+		}
+		
+		//$form .= "<input type=\"hidden\" name=\"id_repository_mytube_youtubeid\" id=\"id_youtubeid\"/>";
+		$mediadata .= $yt->get_youtube_tabset();
+		
+		/*
 		//determine a video title
 		$videotitle = $this->assignment->get_instance()->name . ': ' . fullname($USER);
 		if(strlen($videotitle >90)){$videotitle = substr($videotitle,90);}
@@ -303,12 +370,6 @@ class assign_submission_youtube extends assign_submission_plugin {
 						. "' onclick='window.location.href=\"" . $loginurl. "\"' />";
 					//$upload .= "<a href='" . $loginurl . "'>go to youtube</a>";
 			}else{
-			/*
-				$upload .="<br/>accesstoken:" . $this->youtubeoauth->fetch_accesstoken();
-				$upload .="<br/>scope:" . $this->youtubeoauth->fetch_scope();
-				$upload .="<br/>logged in:" . $this->youtubeoauth->is_logged_in();
-				$upload .="<br/>lurl:" . $this->youtubeoauth->get_login_url();
-			*/
 				$upload .= "<iframe src='$src' width='500' height='110' frameborder='0'></iframe>";
 				}
 		}elseif($uploadpossible){
@@ -318,13 +379,12 @@ class assign_submission_youtube extends assign_submission_plugin {
 		
 		//WEBCAM Tab
 		//get our youtube recorder
-		/* */
 		$webcam = get_string('recordavideodetails', 'assignsubmission_youtube');
 		$webcam .= $this->fetch_youtube_recorder($videotitle);
 		
 
 		//ENTER URL Tab
-		/* manual URL submission */
+		// manual URL submission
 		$manual = get_string('linkavideodetails', 'assignsubmission_youtube');
 		$manual .= "<input type=\"text\" size=\"75\" onchange=\"document.getElementById('id_manualurl').value=this.value;\"/>";
 		
@@ -351,19 +411,21 @@ class assign_submission_youtube extends assign_submission_plugin {
 		$mediadata .= '</ul><div>';
 		$mediadata .= $mediadivs;
 		$mediadata .= '</div></div>';
+		*/
 		
 		//add the controls that will be submitted
 		$mform->addElement('static', 'description', '',$mediadata);	
-		$mform->addElement('hidden','youtubeid','',array('id'=>'id_youtubeid'));
-		$mform->addElement('hidden','manualurl','',array('id'=>'id_manualurl'));
+		$mform->addElement('hidden','youtubeid','',array('id'=>'id_assignsubmission_youtube_youtubeid'));
+		$mform->addElement('hidden','manualurl','',array('id'=>'id_assignsubmission_youtube_manualurl'));
 		$mform->setType('youtubeid', PARAM_TEXT); 
 		$mform->setType('manualurl', PARAM_TEXT); 
 		
 		//create tabs
 		//configure our options array
 		$opts = array(
-			"tabviewid"=> "youtubeassig_uploadtabs"
+			"tabviewid"=> $this->ytconfig->get('tabsetid')
 		);
+
 		
 		//Set up our JS library
 		//			'token'		=> $tokenValue,
@@ -373,14 +435,25 @@ class assign_submission_youtube extends assign_submission_plugin {
 			'requires' => array('tabview')
 		);
 		
+		//Maybe we should call init instead/as well ....? Justin 2013/07/18 
+		
+            $uploader_html = get_string('uploadavideodetails',ASSIGNSUBMISSION_YOUTUBE_COMPONENT) 
+					. $yt->get_uploader_iframe_html();
+            $browselist_html = get_string('browsevideosdetails', ASSIGNSUBMISSION_YOUTUBE_COMPONENT) 
+					. $yt->get_browser_iframe_html();
+            $opts = array(
+                    "tabviewid"=> $this->ytconfig->get('tabsetid'),
+                    "browselist_html"=>$browselist_html,
+                    "uploader_html"=>$uploader_html
+            );
+		$PAGE->requires->js_init_call('M.assignsubmission_youtube.init', array($opts),false,$jsmodule);
 		
 		$PAGE->requires->js_init_call('M.assignsubmission_youtube.loadyuitabs', array($opts),false,$jsmodule);
-
-
 		return true;
 
     }
 	//Here we init the auth, which will set up stuff for google
+	/*
 	  public function initialize_oauth($returnurl) {
 		//the realm is always the same for YouTube api calls
 		//and the clientid and secret are set in the admin settings for this plugin
@@ -390,6 +463,7 @@ class assign_submission_youtube extends assign_submission_plugin {
 		//create and store our YouTube oauth client
         $this->youtubeoauth = new youtube_oauth($clientid, $secret, $returnurl, $realm);
     }
+	*/
 
 	  /**
      * Add form elements onlinepoodll submissions
@@ -397,6 +471,7 @@ class assign_submission_youtube extends assign_submission_plugin {
      * @param string $controlid is the id of a hidden form field into which the video id is inserted
      * @return string containing html to embed a recorder on a page
      */
+	 /*
     public function fetch_youtube_recorder($videotitle) {
 		global $PAGE;
 		
@@ -405,16 +480,7 @@ class assign_submission_youtube extends assign_submission_plugin {
 		$width=500;
 		$ret="";
 	
-	
-		//configure our options array
-		//we aren't using this ...
-		/*
-		$opts = array(
-			"recorderid"=> $recorderid,
-			"width"=> $width,
-			"videotitle"=>$videotitle
-		);
-		*/
+
 		
 		//Set up our JS library
 		//			'token'		=> $tokenValue,
@@ -435,7 +501,8 @@ class assign_submission_youtube extends assign_submission_plugin {
 		
 		return $ret;
 	}
-	
+	*/
+	/*
 	public function fetch_youtube_uploadform($yt,$videotitle,$videodescription){
 		global $CFG, $USER;
 		
@@ -491,6 +558,7 @@ class assign_submission_youtube extends assign_submission_plugin {
 		return $form;
 	
 	}
+	*/
 	
 	/**
      * Sets up js and html elements that will swapped out with a youtube player
@@ -721,6 +789,8 @@ class assign_submission_youtube extends assign_submission_plugin {
 
 }
 
+
+
 /**
  * OAuth 2.0 client for Youtube
  *
@@ -728,6 +798,7 @@ class assign_submission_youtube extends assign_submission_plugin {
  * @copyright 2013 Justin Hunt
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+ /*
 class youtube_oauth extends google_oauth {
 	
 	public function fetch_accesstoken(){
@@ -744,5 +815,6 @@ class youtube_oauth extends google_oauth {
 	}
 
 }
+*/
 
 
